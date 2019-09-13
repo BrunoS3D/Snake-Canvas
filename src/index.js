@@ -10,7 +10,6 @@ const height = canvas.height;
 
 let trail = [];
 let fruits = [];
-let keymap = {};
 
 let direction = "";
 
