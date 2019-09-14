@@ -41,7 +41,7 @@ const keyDirections = {
 }
 
 window.onload = Start;
-setInterval(OnGUI, 170 / level);
+setInterval(OnGUI, 150);
 addEventListener("keydown", OnKeyboardInputDown);
 
 function Start() {
@@ -82,12 +82,13 @@ function OnGUI() {
 
 	// desenha as frutas nas tela
 	fruits.forEach((pos) => {
-		SetPixel(pos.x, pos.y, "red");
+		SetPixel(pos.x, pos.y, "#ffb300");
 	});
 
 	// desenha o corpo da snake
-	trail.forEach((pos) => {
-		SetPixel(pos.x, pos.y, "grey");
+	trail.forEach((pos, index) => {
+		const color = LerpColor("#FF6363", "#7863FF", index / snakeLength);
+		SetPixel(pos.x, pos.y, color);
 	});
 
 	levelElement.textContent = level;
@@ -95,7 +96,7 @@ function OnGUI() {
 	fruitsElement.textContent = fruits.length;
 
 	// ponto de origem da snake
-	SetPixel(x, y, "green");
+	SetPixel(x, y, "black");
 }
 
 function OnInputGUI() {
@@ -167,7 +168,7 @@ function InstantiateFruits() {
 
 function ClearCanvas() {
 	// preenche todo o canvas com um rect branco
-	context.fillStyle = "white";
+	context.fillStyle = "#64a17b";
 	context.fillRect(0, 0, width, height);
 }
 
@@ -175,4 +176,16 @@ function SetPixel(coord_x, coord_y, color) {
 	// desenha um pixel com uma cor definida em uma posicao do canvas
 	context.fillStyle = color;
 	context.fillRect(coord_x, coord_y, 1, 1);
+}
+
+function LerpColor(a, b, amount) {
+	let ah = +a.replace("#", "0x");
+	let ar = ah >> 16, ag = ah >> 8 & 0xff, ab = ah & 0xff;
+	let bh = +b.replace("#", "0x");
+	let br = bh >> 16, bg = bh >> 8 & 0xff, bb = bh & 0xff;
+	let rr = ar + amount * (br - ar);
+	let rg = ag + amount * (bg - ag);
+	let rb = ab + amount * (bb - ab);
+
+	return "#" + ((1 << 24) + (rr << 16) + (rg << 8) + rb | 0).toString(16).slice(1);
 }

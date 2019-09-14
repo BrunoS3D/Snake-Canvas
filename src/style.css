@@ -28,6 +28,7 @@
 #canvas-board {
 	width: 300px;
 	height: 300px;
+	margin: 30px 0;
 	border: 1px solid #000;
 	image-rendering: pixelated;
 }
