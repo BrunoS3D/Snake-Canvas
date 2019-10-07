@@ -6,7 +6,10 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta http-equiv="X-UA-Compatible" content="ie=edge">
 
-	<title>HTML5 Canvas</title>
+	<title>Webdriver-Torso-Simulator</title>
+
+	<!-- fonte pixelada -->
+	<link href="https://fonts.googleapis.com/css?family=Press+Start+2P&display=swap" rel="stylesheet">
 
 	<!-- styles -->
 	<link rel="stylesheet" href="./src/style.css">
@@ -14,29 +17,14 @@
 
 <body>
 
-	<div class="main-container">
-		<div class="content">
-			<h1>Snake Canvas</h1>
-			<div class="score-content">
-				<div>
-					<h5>SCORE</h5>
-					<p id="score">0</p>
-				</div>
-				<div>
-					<h5>FRUITS</h5>
-					<p id="fruits">0</p>
-				</div>
-				<div>
-					<h5>LEVEL</h5>
-					<p id="level">0</p>
-				</div>
-			</div>
-			<canvas id="canvas-board" width="30" height="30">
-			</canvas>
-		</div>
+	<div id="container">
+		<button class="start-button" onclick="start();">START</button>
 	</div>
 
-	<script src="./src/levels.js"></script>
+	<canvas id="canvas-board" width="30" height="30"></canvas>
+
+	<div id="aqua-label">aqua.flv - slide 0000</div>
+
 	<script src="./src/index.js"></script>
 
 </body>

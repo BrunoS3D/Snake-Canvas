@@ -1,197 +1,83 @@
-const levelElement = document.getElementById("level");
-const scoreElement = document.getElementById("score");
-const fruitsElement = document.getElementById("fruits");
-const canvas = document.getElementById("canvas-board");
 
-const context = canvas.getContext("2d");
+class Sound {
 
-const width = canvas.width;
-const height = canvas.height;
+	constructor(context) {
+		this.context = context;
+	}
 
-let trail = [];
-let fruits = [];
+	init() {
+		this.oscillator = this.context.createOscillator();
+		this.gainNode = this.context.createGain();
 
-let direction = "";
+		this.oscillator.connect(this.gainNode);
+		this.gainNode.connect(this.context.destination);
+		this.oscillator.type = 'sine';
+	}
 
-let x = 15;
-let y = 15;
+	play(value, time) {
+		this.init();
 
-let level = 1;
-let snakeLength = 3;
-let fruitsCount = 3;
+		this.oscillator.frequency.value = value;
+		this.gainNode.gain.setValueAtTime(1, this.context.currentTime);
 
-// direcoes = event.key
-const keyDirections = {
-	ArrowUp: {
-		x: 0,
-		y: 1
-	},
-	ArrowDown: {
-		x: 0,
-		y: -1
-	},
-	ArrowLeft: {
-		x: -1,
-		y: 0
-	},
-	ArrowRight: {
-		x: 1,
-		y: 0
+		this.oscillator.start(time);
+		this.stop(time);
+
+	}
+
+	stop(time) {
+		this.oscillator.stop(time + 1);
 	}
 }
 
-window.onload = Start;
-setInterval(OnGUI, 150);
-addEventListener("keydown", OnKeyboardInputDown);
+function start() {
+	const container = document.getElementById("container");
+	container.remove();
 
-function Start() {
-	// cria as frutas em posicoes aleatorias do canvas
-	InstantiateFruits();
-}
+	const canvas = document.getElementById("canvas-board");
+	const aqual_label = document.getElementById("aqua-label");
 
-function OnGUI() {
-	// gameover / animacao inicial
-	if (trail.some((pos) => pos.x === x && pos.y === y) || (levels[level] && levels[level].some((pos) => pos.x === x && pos.y === y))) {
-		direction = "";
-		x = 15;
-		y = 15;
-		trail = [];
-		fruits = [];
-		level = 1;
-		snakeLength = 3;
-		fruitsCount = 3;
-		InstantiateFruits();
-		return;
+	const canvas_context = canvas.getContext("2d");
+	const audio_context = new (window.AudioContext || window.webkitAudioContext)();
+
+	canvas.width = window.innerWidth;
+	canvas.height = window.innerHeight;
+
+	const width = canvas.width;
+	const height = canvas.height;
+
+	let frame_index = 0;
+
+	// atualiza o canvas e o som a cada 1s
+	setInterval(OnGUI, 1000);
+
+	function OnGUI() {
+		// limpa o canvas
+		ClearCanvas();
+
+		// atualiza nossa label =]
+		const frame_string = "000" + frame_index++;
+		aqual_label.textContent = `aqua.flv - slide ${frame_string.substr(frame_string.length - 4)}`;
+
+		// primeiro o retangulo azul
+		canvas_context.fillStyle = "#00f";
+		canvas_context.fillRect(Math.random() * width, Math.random() * height, Math.random() * width, Math.random() * height);
+
+		// em seguida o retangulo vermelho
+		// pois o retangulo vermelho sempre sobrepoe o azul
+		canvas_context.fillStyle = "#f00";
+		canvas_context.fillRect(Math.random() * width, Math.random() * height, Math.random() * width, Math.random() * height);
+
+		// instancia e reproduz uma nota
+		const note = new Sound(audio_context);
+		const now = audio_context.currentTime;
+
+		note.play(1000 - (Math.random() * 900), now);
 	}
-	else {
-		// adiciona a posicao atuao ao corpo da snake
-		trail.push({ x, y });
-		if (trail.length > snakeLength) {
-			// remove o ultimo pixel do corpo da snake
-			// dando aquela sensacao de movimento
-			trail.shift();
-		}
+
+	function ClearCanvas() {
+		// preenche todo o canvas com um rect branco
+		canvas_context.fillStyle = "#ffffff";
+		canvas_context.fillRect(0, 0, width, height);
 	}
-
-	// "limpa" o canvas, na verdade sobreescreve tudo de branco
-	ClearCanvas();
-
-	// verifica alteracoes na direcao e realiza
-	// a movimentacao dos pixels do corpo da snake
-	OnInputGUI();
-
-	if (levels[level]) {
-		// desenha as paredes do level atual
-		levels[level].forEach((pos) => {
-			SetPixel(pos.x, pos.y, "#000");
-		});
-	}
-	// desenha as frutas nas tela
-	fruits.forEach((pos) => {
-		SetPixel(pos.x, pos.y, "#ffb300");
-	});
-
-	// desenha o corpo da snake
-	trail.forEach((pos, index) => {
-		const color = LerpColor("#FF6363", "#7863FF", index / snakeLength);
-		SetPixel(pos.x, pos.y, color);
-	});
-
-	levelElement.textContent = level;
-	scoreElement.textContent = snakeLength - 3;
-	fruitsElement.textContent = fruits.length;
-
-	// ponto de origem da snake
-	SetPixel(x, y, "white");
-}
-
-function OnInputGUI() {
-	// se a direcao inicial ja foi definida
-	// sera realizado a movimentacao
-	if (direction) {
-		const dir = keyDirections[direction];
-
-		x += dir.x;
-		y -= dir.y;
-
-		// portal para que a snake nao saia da parte visivel do canvas
-		if (x < 0) {
-			x = width - 1;
-		}
-		else if (x >= width) {
-			x = 0;
-		}
-		if (y < 0) {
-			y = height - 1;
-		}
-		else if (y >= height) {
-			y = 0;
-		}
-
-		// pega apenas as frutas que nao estiverem na mesma posicao da snake
-		const filter = fruits.filter((pos) => !(pos.x === x && pos.y === y));
-
-		// compara e verifica se houve alteracao
-		// se sim, ele aumenta o tamanho da nossa amiguinha
-		if (fruits.length !== filter.length) {
-			fruits = filter;
-			snakeLength++;
-		}
-
-		// se nao houverem mais frutas ele nos passa de level
-		if (filter.length === 0) {
-			level++;
-			fruitsCount += 3;
-			InstantiateFruits();
-		}
-	}
-}
-
-function OnKeyboardInputDown(event) {
-	// tecla pressionada
-	const targetDirection = keyDirections[event.key];
-
-	// se a tecla estiver na nossa lista de direcoes (keyDirections)
-	if (targetDirection) {
-		const currentDirection = keyDirections[direction];
-		// evita que ela retorne em cima do proprio corpo
-		if (currentDirection && (currentDirection.x - targetDirection.x === 0 || currentDirection.y - targetDirection.y === 0)) return;
-
-		// define a nova direcao
-		direction = event.key;
-	}
-}
-
-function InstantiateFruits() {
-	// cria as furtas no canvas em posicoes aleatorias
-	for (let id = 0; id < fruitsCount; id++) {
-		fruits.push({
-			x: (Math.floor(Math.random() * width)),
-			y: (Math.floor(Math.random() * height))
-		});
-	}
-}
-
-function ClearCanvas() {
-	// preenche todo o canvas com um rect branco
-	context.fillStyle = "#64a17b";
-	context.fillRect(0, 0, width, height);
-}
-
-function SetPixel(coord_x, coord_y, color) {
-	// desenha um pixel com uma cor definida em uma posicao do canvas
-	context.fillStyle = color;
-	context.fillRect(coord_x, coord_y, 1, 1);
-}
-
-function LerpColor(a, b, amount) {
-	let ah = +a.replace("#", "0x");
-	let ar = ah >> 16, ag = ah >> 8 & 0xff, ab = ah & 0xff;
-	let bh = +b.replace("#", "0x");
-	let br = bh >> 16, bg = bh >> 8 & 0xff, bb = bh & 0xff;
-	let rr = ar + amount * (br - ar);
-	let rg = ag + amount * (bg - ag);
-	let rb = ab + amount * (bb - ab);
-
-	return "#" + ((1 << 24) + (rr << 16) + (rg << 8) + rb | 0).toString(16).slice(1);
 }
