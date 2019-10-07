@@ -51,7 +51,7 @@ function Start() {
 
 function OnGUI() {
 	// gameover / animacao inicial
-	if (trail.some((pos) => pos.x === x && pos.y === y) || (levels[level] && levels[level].some((pos) => pos.x === x && pos.y === y))) {
+	if (trail.some((pos) => pos.x === x && pos.y === y)) {
 		direction = "";
 		x = 15;
 		y = 15;
@@ -80,12 +80,6 @@ function OnGUI() {
 	// a movimentacao dos pixels do corpo da snake
 	OnInputGUI();
 
-	if (levels[level]) {
-		// desenha as paredes do level atual
-		levels[level].forEach((pos) => {
-			SetPixel(pos.x, pos.y, "#000");
-		});
-	}
 	// desenha as frutas nas tela
 	fruits.forEach((pos) => {
 		SetPixel(pos.x, pos.y, "#ffb300");
@@ -102,7 +96,7 @@ function OnGUI() {
 	fruitsElement.textContent = fruits.length;
 
 	// ponto de origem da snake
-	SetPixel(x, y, "white");
+	SetPixel(x, y, "black");
 }
 
 function OnInputGUI() {
