@@ -80,6 +80,13 @@ function OnGUI() {
 	// a movimentacao dos pixels do corpo da snake
 	OnInputGUI();
 
+	if (levels[level]) {
+		// desenha as paredes do level atual
+		levels[level].forEach((pos) => {
+			SetPixel(pos.x, pos.y, "#000");
+		});
+	}
+
 	// desenha as frutas nas tela
 	fruits.forEach((pos) => {
 		SetPixel(pos.x, pos.y, "#ffb300");
@@ -96,7 +103,7 @@ function OnGUI() {
 	fruitsElement.textContent = fruits.length;
 
 	// ponto de origem da snake
-	SetPixel(x, y, "black");
+	SetPixel(x, y, "white");
 }
 
 function OnInputGUI() {
