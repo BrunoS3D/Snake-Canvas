@@ -39,6 +39,7 @@ const keyDirections = {
 		y: 0
 	}
 }
+<<<<<<< HEAD
 
 window.onload = Start;
 setInterval(OnGUI, 150);
@@ -70,9 +71,116 @@ function OnGUI() {
 			// remove o ultimo pixel do corpo da snake
 			// dando aquela sensacao de movimento
 			trail.shift();
+=======
+
+window.onload = Start;
+setInterval(OnGUI, 150);
+addEventListener("keydown", OnKeyboardInputDown);
+
+function Start() {
+	// cria as frutas em posicoes aleatorias do canvas
+	InstantiateFruits();
+}
+
+function OnGUI() {
+	// gameover / animacao inicial
+	if (trail.some((pos) => pos.x === x && pos.y === y) || (levels[level] && levels[level].some((pos) => pos.x === x && pos.y === y))) {
+		direction = "";
+		x = 15;
+		y = 15;
+		trail = [];
+		fruits = [];
+		level = 1;
+		snakeLength = 3;
+		fruitsCount = 3;
+		InstantiateFruits();
+		return;
+	}
+	else {
+		// adiciona a posicao atuao ao corpo da snake
+		trail.push({ x, y });
+		if (trail.length > snakeLength) {
+			// remove o ultimo pixel do corpo da snake
+			// dando aquela sensacao de movimento
+			trail.shift();
 		}
 	}
 
+	// "limpa" o canvas, na verdade sobreescreve tudo de branco
+	ClearCanvas();
+
+	// verifica alteracoes na direcao e realiza
+	// a movimentacao dos pixels do corpo da snake
+	OnInputGUI();
+
+	if (levels[level]) {
+		// desenha as paredes do level atual
+		levels[level].forEach((pos) => {
+			SetPixel(pos.x, pos.y, "#000");
+		});
+	}
+	// desenha as frutas nas tela
+	fruits.forEach((pos) => {
+		SetPixel(pos.x, pos.y, "#ffb300");
+	});
+
+	// desenha o corpo da snake
+	trail.forEach((pos, index) => {
+		const color = LerpColor("#FF6363", "#7863FF", index / snakeLength);
+		SetPixel(pos.x, pos.y, color);
+	});
+
+	levelElement.textContent = level;
+	scoreElement.textContent = snakeLength - 3;
+	fruitsElement.textContent = fruits.length;
+
+	// ponto de origem da snake
+	SetPixel(x, y, "white");
+}
+
+function OnInputGUI() {
+	// se a direcao inicial ja foi definida
+	// sera realizado a movimentacao
+	if (direction) {
+		const dir = keyDirections[direction];
+
+		x += dir.x;
+		y -= dir.y;
+
+		// portal para que a snake nao saia da parte visivel do canvas
+		if (x < 0) {
+			x = width - 1;
+		}
+		else if (x >= width) {
+			x = 0;
+		}
+		if (y < 0) {
+			y = height - 1;
+		}
+		else if (y >= height) {
+			y = 0;
+		}
+
+		// pega apenas as frutas que nao estiverem na mesma posicao da snake
+		const filter = fruits.filter((pos) => !(pos.x === x && pos.y === y));
+
+		// compara e verifica se houve alteracao
+		// se sim, ele aumenta o tamanho da nossa amiguinha
+		if (fruits.length !== filter.length) {
+			fruits = filter;
+			snakeLength++;
+		}
+
+		// se nao houverem mais frutas ele nos passa de level
+		if (filter.length === 0) {
+			level++;
+			fruitsCount += 3;
+			InstantiateFruits();
+>>>>>>> parent of fbe098b... Initial commit
+		}
+	}
+
+<<<<<<< HEAD
 	// "limpa" o canvas, na verdade sobreescreve tudo de branco
 	ClearCanvas();
 
@@ -151,6 +259,18 @@ function OnKeyboardInputDown(event) {
 		// evita que ela retorne em cima do proprio corpo
 		if (currentDirection && (currentDirection.x - targetDirection.x === 0 || currentDirection.y - targetDirection.y === 0)) return;
 
+=======
+function OnKeyboardInputDown(event) {
+	// tecla pressionada
+	const targetDirection = keyDirections[event.key];
+
+	// se a tecla estiver na nossa lista de direcoes (keyDirections)
+	if (targetDirection) {
+		const currentDirection = keyDirections[direction];
+		// evita que ela retorne em cima do proprio corpo
+		if (currentDirection && (currentDirection.x - targetDirection.x === 0 || currentDirection.y - targetDirection.y === 0)) return;
+
+>>>>>>> parent of fbe098b... Initial commit
 		// define a nova direcao
 		direction = event.key;
 	}
